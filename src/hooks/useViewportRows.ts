@@ -4,7 +4,7 @@ import { floor, max, min } from '../utils';
 
 interface ViewportRowsArgs<R> {
   rows: readonly R[];
-  rowHeight: number | ((row: R) => number);
+  rowHeight: number | ((row: R) => number | string);
   clientHeight: number;
   scrollTop: number;
   enableVirtualization: boolean;
@@ -35,10 +35,17 @@ export function useViewportRows<R>({
     // https://github.com/bvaughn/react-window/blob/b0a470cc264e9100afcaa1b78ed59d88f7914ad4/src/VariableSizeList.js#L68
     const rowPositions = rows.map((row) => {
       const currentRowHeight = rowHeight(row);
-      const position = { top: totalRowHeight, height: currentRowHeight };
-      gridTemplateRows += `${currentRowHeight}px `;
-      totalRowHeight += currentRowHeight;
-      return position;
+
+      if (typeof currentRowHeight === "number") {
+        gridTemplateRows += `${currentRowHeight}px `;
+        totalRowHeight += currentRowHeight;
+
+        return { top: totalRowHeight, height: currentRowHeight };
+      } else {
+        gridTemplateRows += `${currentRowHeight} `;
+    
+        return { top: 0, height: 0}
+      }
     });
 
     const validateRowIdx = (rowIdx: number) => {
